@@ -110,7 +110,255 @@ And thats it... we have solved the problem. The code is below:
         }
     }
 
+-----------------
 
 ### Recursion in Memory
 
+
+**Introduction**
+
+It is very easy to visualize a recursive program in terms of induction to understand how it works. However 'under the hood' recursive programs run with the help of a stack.
+
+Every time a function is called, it is placed on the top of the stack. Once the function finishes its execution, it is popped from the stack and its return value is returned to its caller which is the next element of the stack that was just under it.
+
+The program finishes execution when the stack becomes empty. The objective of this post is to simulate these series of steps using a stack so we can solve any recursive program iteratively.
+
+To do this, I will be using the three depth first traversals as an example - pre-order, in-order and post-order traversals. We will be performing all 3 traversals iteratively using the exact same technique. This technique can be extended to any recursive function.
+
+-------------
+
+**The General Idea**
+
+When you have a recursive function we can have 'n' calls in addition to the current function's action. Let's look at the 3 traversals in greater detail and see what is going on.
+
+--------
+
+**Pre-Order Traversal**
+
+In the case of pre-order traversal we do the following:
+
+    call the initial function
+    perform the function action // explore the root
+    make recursive call 1 // explore left subtree
+    make recursive call 2 // explore right subtree
+
+Here the computer does the following:
+
+- Place the function on the stack
+ - The stack is: [calling function]
+- Now we do some action such as processing the root val a certain way etc.
+ - The stack is: [calling function]
+- When we are done, call recursive function 1. 
+ - The stack is: [calling function -> recursive function 1]
+- It fully processes recursive function 1 then pops it.
+ - The stack is: [calling function]
+- Next the stack calls recursive function 2
+ - The stack is: [calling function -> recursive function 2]
+- The stack processes function 2 and pops it
+ - The stack is: [calling function]
+- Since there is nothing left to do in the calling function, the stack pops calling function
+ - The stack is: []
+- Stack is empty so we return.
+
+-----
+
+**In-order Traversal**
+
+In the case of in-order we do the following:
+
+    call the initial function
+    make recursive call 1 // explore left subtree
+    perform the function action // explore the root
+    make recursive call 2 // explore right subtree
+
+Here the computer does the following:
+
+- Place the function on the stack
+ - The stack is: [calling function]
+- Call recursive function 1. 
+ - The stack is: [calling function -> recursive function 1]
+- It fully processes recursive function 1 then pops it.
+ - The stack is: [calling function]
+- Now we do some action such as processing the root val a certain way etc.
+ - The stack is: [calling function]
+- Next the stack calls recursive function 2
+ - The stack is: [calling function -> recursive function 2]
+- The stack processes function 2 and pops it
+ - The stack is: [calling function]
+- Since there is nothing left to do in the calling function, the stack pops calling function
+ - The stack is: []
+- Stack is empty so we return.
+
+----------
+
+**Post-Order Traversal**
+
+In the case of post order traversal we do the following:
+
+    call the initial function
+    make recursive call 1 // explore left subtree
+    make recursive call 2 // explore right subtree
+    perform the function action // explore the root
+
+Here the computer does the following:
+
+- Place the function on the stack
+ - The stack is: [calling function]
+- Call recursive function 1. 
+ - The stack is: [calling function -> recursive function 1]
+- It fully processes recursive function 1 then pops it.
+ - The stack is: [calling function]
+- Next the stack calls recursive function 2
+ - The stack is: [calling function -> recursive function 2]
+- The stack processes function 2 and pops it
+ - The stack is: [calling function]
+- Now we do some action such as processing the root val a certain way etc.
+ - The stack is: [calling function]
+- Since there is nothing left to do in the calling function, the stack pops calling function
+ - The stack is: []
+- Stack is empty so we return.
+
+------------
+
+**Observations**
+
+The three recurrences above despite being fairly different are processed in a very similar manner. Some observations can be made about this which are as follows:
+
+1. The caller which has to be processed is the first element on the stack
+2. The calling function is popped off the stack only after all its sub-problems (functions it calls) have been popped. It is the last to leave the stack.
+3. Each time we process the calling function, the calling function is aware of its own state.
+ 1. This means it knows what sub-functions it has called, it knows when to execute its own function content, it knows what sub-function to call next and it knows when it should stop.
+4. If the stack is empty, it means the caller (and all its sub-functions) have been processed and we are finally done.
+
+What this means is that if we were to simulate the process above in order to convert any recursive function into an iterative process we need to do the same.
+
+1. We must keep track of the state of the calling function and when a subfunction has been processed the state must change accordingly
+2. The state that holds the result should be the first element in the stack and the last element out of it.
+
+-------------
+
 ### Recursion and Iteration
+
+**Introduction**
+
+Here we will look at a generic method to convert any recursive function into an iterative process. To do so, we will take a look at the three types of dfs tree traversals - preorder, inorder and postorder traversals and convert them into an iterative program in the same exact way. We will do this by simulating how recursion is handled in memory using a stack.
+
+**The Pattern**
+
+**Note to self:** write this in a better way. The way its described now is horrible.
+
+1. Maintain 2 stacks (or two slots on the same stack). The first stack should hold the input of the calling function (this represents the caller) and the second stack should hold a state representing the first recursive call.
+ 1. Note: The states held in the state stack are states representing the current caller and all the recursive calls the caller makes.
+ 2. So for traversal, the current caller state = root and the recursive call states = left and right
+2. While the stack is not empty do the following:
+ 1. Pop the stacks and get function, state to be processed.
+ 2. Look at the state. If a function is to be called recursively, first push the current function in the stack with a state representing its next action and then push the function to be called along with its initial state.
+ 3. If the state indicates that the current node is to be processed process it.
+3. Repeat this until stack is empty.
+
+We will use this pattern to solve the three traversals the same way.
+
+----------
+
+In the case of the traversals, the states are root, left and right. The programs for all 3 are shown below. To keep the programs short and concise I will do the following:
+
+I will declare the function stack and the state stack as global variables:
+    
+    Stack<Node> functionStack = new Stack<>();
+    Stack<String> stateStack = new Stack<>();
+
+
+And I will declare an helper function to push to both stacks as follows:
+
+    private void push(Node node, String state) {
+        functionStack.push(node);
+        stateStack.push(state);
+    }
+
+
+-----------
+
+**Preorder Traversal**
+
+The iterative version of preorder traversal using the pattern described above is as follows:
+
+    // root left right
+    private void preorder(Node root) {
+        push(root, "root");
+        while (!functionStack.isEmpty()) {
+            Node current = functionStack.pop();
+            String state = stateStack.pop();
+
+            if(current == null)
+                continue;
+
+            if(state.equals("root")) {
+                System.out.println(current.val);
+                push(current, "left");
+            } else if(state.equals("left")) {
+                push(current, "right");
+                push(current.left, "root");
+            } else if(state.equals("right")) {
+                push(current, "end");
+                push(current.right, "root");
+            }
+        }
+    }
+
+---------
+
+**Inorder Traversal**
+
+The iterative version of inorder traversal using the pattern described above is as follows:
+
+    // left root right
+    private void inorder(Node root) {
+        push(root, "left");
+        while(!functionStack.isEmpty()) {
+            Node current = functionStack.pop();
+            String state = stateStack.pop();
+
+            if(current == null)
+                continue;
+
+            if(state.equals("left")) {
+                push(current, "root");
+                push(current.left, "left");
+            } else if(state.equals("root")) {
+                System.out.println(current.val);
+                push(current, "right");
+            } else if(state.equals("right")) {
+                push(current, "end");
+                push(current.right, "left");
+            }
+        }
+    }
+
+--------
+
+**Postorder Traversal**
+
+The iterative version of postorder traversal using the pattern described above is as follows:
+
+    // left right root
+    private void postorder(Node root) {
+        push(root, "left");
+        while (!functionStack.isEmpty()) {
+            Node current = functionStack.pop();
+            String state = stateStack.pop();
+
+            if(current == null)
+                continue;
+
+            if(state.equals("left")) {
+                push(current, "right");
+                push(current.left, "left");
+            } else if(state.equals("right")) {
+                push(current, "root");
+                push(current.right, "left");
+            } else if(state.equals("root")) {
+                System.out.println(current.val);
+                push(current, "end");
+            }
+        }
+    }
