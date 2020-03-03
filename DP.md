@@ -5,8 +5,9 @@
   * [Recursive Thinking](#Recursive-thinking)
   * [Recursion in Memory](#Recursion-in-memory)
   * [Recursion and Iteration](#Recursion-and-Iteration)
-- [Heading](#heading-2)
-  * [Sub-heading](#sub-heading-2)
+- [Dynamic Programming](#Dynamic-Programming)
+  * [Introduction to DP](#Introduction-to-DP)
+  * [Pattern-1 DP built on Recursion](#Pattern-1-DP-built-on-Recursion)
     + [Sub-sub-heading](#sub-sub-heading-2)
 
 
@@ -362,3 +363,11 @@ The iterative version of postorder traversal using the pattern described above i
             }
         }
     }
+    
+--------------
+
+## Dynamic Programming
+
+### Introduction to DP
+
+### Pattern-1 DP built on Recursion
